@@ -37,22 +37,22 @@ def main():
 
     df_shuffled = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-    # Define chunk size
-    chunk_size = 10000
+    # Define segment size
+    segment_size = 10000
 
-    # Iterate in chunks
-    for i in range(0, len(df_shuffled), chunk_size):
-        chunk = df_shuffled.iloc[i:i + chunk_size]
-        print(f"Starting to evaluate chunk {i}-{i + chunk_size}")
+    # Iterate in segments
+    for i in range(0, len(df_shuffled), segment_size):
+        df_segment = df_shuffled.iloc[i:i + segment_size]
+        print(f"Starting to evaluate segment {i}-{i + segment_size}")
 
-        chunk = chunk[chunk["answer"].str.split().str.len() <= MAX_ANSWER_LENGTH_BY_WORDS]
+        df_segment = df_segment[df_segment["answer"].str.split().str.len() <= MAX_ANSWER_LENGTH_BY_WORDS]
 
-        chunk['model_answer'] = chunk['question'].apply(generate_model_answer)  # progress_apply
-        chunk['model_answer_wt_context'] = chunk.apply(lambda row: generate_model_answer(
+        df_segment['model_answer'] = df_segment['question'].apply(generate_model_answer)  # progress_apply
+        df_segment['model_answer_wt_context'] = df_segment.apply(lambda row: generate_model_answer(
             row["prev_sentence"] + " " + row["question"] if type(row["prev_sentence"]) == type(" ") == type(
                 row["question"]) else "ERROR"), axis=1)  # progress_apply
 
-        chunk.to_csv(f'/Path/to/directory/results/df_with_answers_{i}.csv', encoding='utf-8')
+        df_segment.to_csv(f'/Path/to/directory/results/df_with_answers_{i}.csv', encoding='utf-8')
 
 
 if __name__ == '__main__':
